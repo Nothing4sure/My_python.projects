@@ -1,78 +1,92 @@
-# Initialize an empty list to store tasks
-tasks = []
+import os
 
-def show_tasks():
-    """Function to display all the tasks."""
-    if tasks:
-        print("\nTo-Do List:")
-        for index, task in enumerate(tasks, 1):
-            status = "Completed" if task['completed'] else "Pending"
-            print(f"{index}. {task['task']} - {task['priority']} - {status}")
-    else:
-        print("\nYour to-do list is empty.")
+# File to store the to-do list
+FILE_NAME = "todo_list.txt"
 
-def add_task():
-    """Function to add a task to the list."""
-    task = input("Enter the task you want to add: ")
-    priority = input("Enter priority (High, Medium, Low): ").capitalize()
-    if priority not in ["High", "Medium", "Low"]:
-        print("Invalid priority! Setting to Medium.")
-        priority = "Medium"
-    
-    tasks.append({"task": task, "priority": priority, "completed": False})
-    print(f"Task '{task}' with priority '{priority}' added to your to-do list.")
+def load_tasks():
+    """Load tasks from the text file."""
+    if os.path.exists(FILE_NAME):
+        with open(FILE_NAME, "r") as file:
+            tasks = file.readlines()
+        return [task.strip() for task in tasks]
+    return []
 
-def delete_task():
-    """Function to delete a task from the list."""
-    show_tasks()
+def save_tasks(tasks):
+    """Save tasks to the text file."""
+    with open(FILE_NAME, "w") as file:
+        for task in tasks:
+            file.write(f"{task}\n")
+
+def add_task(tasks):
+    """Add a new task to the list."""
+    task = input("Enter a task: ")
+    tasks.append(task)
+    save_tasks(tasks)
+    print(f"Task '{task}' added.")
+
+def view_tasks(tasks):
+    """Display all tasks."""
+    if not tasks:
+        print("No tasks found.")
+        return
+    print("\nYour To-Do List:")
+    for idx, task in enumerate(tasks, start=1):
+        print(f"{idx}. {task}")
+
+def mark_completed(tasks):
+    """Mark a task as completed."""
+    view_tasks(tasks)
     try:
-        task_num = int(input("Enter the task number to delete: "))
-        if 1 <= task_num <= len(tasks):
-            removed_task = tasks.pop(task_num - 1)
-            print(f"Task '{removed_task['task']}' removed from your to-do list.")
+        task_number = int(input("Enter the task number to mark as completed: "))
+        if 1 <= task_number <= len(tasks):
+            completed_task = tasks.pop(task_number - 1)
+            save_tasks(tasks)
+            print(f"Task '{completed_task}' marked as completed and removed from the list.")
         else:
             print("Invalid task number.")
     except ValueError:
-        print("Please enter a valid number.")
+        print("Invalid input. Please enter a number.")
 
-def mark_completed():
-    """Function to mark a task as completed."""
-    show_tasks()
+def delete_task(tasks):
+    """Delete a task from the list."""
+    view_tasks(tasks)
     try:
-        task_num = int(input("Enter the task number to mark as completed: "))
-        if 1 <= task_num <= len(tasks):
-            tasks[task_num - 1]["completed"] = True
-            print(f"Task '{tasks[task_num - 1]['task']}' marked as completed.")
+        task_number = int(input("Enter the task number to delete: "))
+        if 1 <= task_number <= len(tasks):
+            deleted_task = tasks.pop(task_number - 1)
+            save_tasks(tasks)
+            print(f"Task '{deleted_task}' deleted from the list.")
         else:
             print("Invalid task number.")
     except ValueError:
-        print("Please enter a valid number.")
+        print("Invalid input. Please enter a number.")
 
 def main():
-    """Main function to run the to-do list app."""
+    tasks = load_tasks()
+    
     while True:
-        print("\nTo-Do List Application")
-        print("1. Show tasks")
-        print("2. Add a task")
-        print("3. Delete a task")
-        print("4. Mark task as completed")
+        print("\nTo-Do List Menu:")
+        print("1. Add a task")
+        print("2. View tasks")
+        print("3. Mark task as completed")
+        print("4. Delete task")
         print("5. Exit")
-
-        choice = input("Choose an option: ")
-
+        
+        choice = input("Choose an option (1-5): ")
+        
         if choice == "1":
-            show_tasks()
+            add_task(tasks)
         elif choice == "2":
-            add_task()
+            view_tasks(tasks)
         elif choice == "3":
-            delete_task()
+            mark_completed(tasks)
         elif choice == "4":
-            mark_completed()
+            delete_task(tasks)
         elif choice == "5":
-            print("Goodbye!")
+            print("Exiting To-Do List. Goodbye!")
             break
         else:
-            print("Invalid choice. Please select a valid option.")
+            print("Invalid option, please try again.")
 
 if __name__ == "__main__":
     main()
